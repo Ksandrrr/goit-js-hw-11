@@ -39,6 +39,7 @@ let isSubmitted = false;
 formSearch.addEventListener(`submit`, searchPixabay);
 
 function searchPixabay(e) {
+  e.preventDefault()
   clearCardInterface()
   page = 1
   const {
@@ -46,7 +47,6 @@ function searchPixabay(e) {
   } = e.currentTarget;
   currentSearch = searchQuery.value;
 
-  e.preventDefault()
   valueInput = searchQuery.value
   fetchPixabayAPI(valueInput)
  
