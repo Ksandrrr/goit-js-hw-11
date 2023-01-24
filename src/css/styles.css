@@ -151,7 +151,6 @@ img {
   bottom: 20px;
   right: 10px;
   text-decoration: none;
-  opacity: 0;
   -webkit-transition: opacity 500ms;
   -moz-transition: opacity 500ms;
   -ms-transition: opacity 500ms;

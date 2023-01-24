@@ -65,9 +65,8 @@ function searchPixabay(e) {
     }
     isSubmitted = true;
    })
-    .catch((err) => {
-    alert(err)
-    })
+  .catch(err => Notiflix.Notify.failure(err))
+
 }
 
 
@@ -117,13 +116,14 @@ window.addEventListener("scroll", () => {
     fetchPixabayAPI(currentSearch, page)
       .then(images => {
         creatCardList(images);
-        console.log(cardLength.length,images.totalHits )
+         arrow.style.opacity = `1`;
         if (window.innerHeight + window.scrollY >= document.body.offsetHeight && cardLength.length === images.totalHits) {
           Notiflix.Notify.failure("We're sorry, but you've reached the end of search results.")
         }
+        
       })
   }
-      arrow.style.opacity = `1`;
+      
 });
 
 function clearCardInterface() {
@@ -158,5 +158,4 @@ updateCode();
 arrow.addEventListener(`click`, () => {
   arrow.style.opacity = `0`;
   searchInput.value = ``
-
 })
