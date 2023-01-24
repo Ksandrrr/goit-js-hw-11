@@ -23,56 +23,63 @@ const fetchPixabayAPI = (searchTerm,page) => {
         image_type: "photo",
         orientation: "horizontal",
        safesearch: true,
-       perPage: 40,
+       per_page: 40,  
        page: page
       }
     }).then(response => {
-      if (response.status === 200) {
-        resolve(response.data.hits);
-      } else {
-        reject(new Error("Failed to retrieve images"));
-      }
-    }).catch(err => {
-      reject(err);
-    });
+      resolve(response.data);
+      reject(new Error("Failed to retrieve images"));
+    })
   });
 }
 
-formSearch.addEventListener(`submit`, searchPixabay)
+let valueInput;
+let cardLength;
+let isSubmitted = false;
+formSearch.addEventListener(`submit`, searchPixabay);
 
 function searchPixabay(e) {
-
+  clearCardInterface()
+  page = 1
   const {
     elements: { searchQuery }
   } = e.currentTarget;
   currentSearch = searchQuery.value;
- 
+
   e.preventDefault()
-  let valueInput = searchQuery.value
+  valueInput = searchQuery.value
   fetchPixabayAPI(valueInput)
  
    .then(images => {
     if (searchQuery.value.length === 0) {
       clearCardInterface()
      Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
-    }else if (searchQuery.value.length > 0) {
+    } else if (images.totalHits === 0) {
+      clearCardInterface()
+    Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+    }else if (searchQuery.value.length > 0 && images.totalHits > 0) {
       creatCardList(images)
     }
-
-  })
-   .catch(err => {
-     "Sorry, there are no images matching your search query. Please try again."
-   });
+    if (isSubmitted && images.totalHits > 0) {
+      Notiflix.Notify.success(`Hooray! We found ${images.totalHits} images.`)
+    }
+    isSubmitted = true;
+   })
+    .catch((err) => {
+    alert(err)
+    })
 }
+
 
 function clearCardInterface() {
   listCard.innerHTML = ``;
 }
+
 function creatCardList(array) {
-  const markupArray = array.map((image) => {
+  const markupArray = array.hits.map((image) => {
     return `
     <div class="photo-card">
-        <a href="${image.largeImageURL}" onclick="return false"><img class="photo_card_small" src="${image.webformatURL}" alt="${image.tags}" loading="lazy" width="200" height="152"/></a>
+        <a class="link-large_Photo" href="${image.largeImageURL}" onclick="return false"><img class="photo_card_small" src="${image.webformatURL}" alt="${image.tags}" loading="lazy" width="200" height="152"/>
         <div class="info">
           <p class="info-item">
             <b>Likes</b>
@@ -92,13 +99,17 @@ function creatCardList(array) {
             ${image.downloads}
           </p>
         </div>
+        </a>
       </div>`;
   });
   listCard.innerHTML += markupArray.join('');
   const lightbox = new SimpleLightbox('.photo-card a');
+  lightbox.on('show.simplelightbox', function () {
+	showCounter = false
+});
+ cardLength = document.querySelectorAll(`.photo-card`)
+    
 }
-
-
 
 window.addEventListener("scroll", () => {
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
@@ -106,31 +117,22 @@ window.addEventListener("scroll", () => {
     fetchPixabayAPI(currentSearch, page)
       .then(images => {
         creatCardList(images);
+        console.log(cardLength.length,images.totalHits )
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight && cardLength.length === images.totalHits) {
+          Notiflix.Notify.failure("We're sorry, but you've reached the end of search results.")
+        }
       })
-      .catch(err => {
-        console.error(err);
-      });
-    arrow.style.opacity = `1`;
   }
+      arrow.style.opacity = `1`;
 });
 
 function clearCardInterface() {
 listCard.innerHTML = ``;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 ////// *** //////
+
+
 const code = ["Search images..."];
 let index = 0;
 let letterIndex = 0;
@@ -155,5 +157,6 @@ function updateCode() {
 updateCode();
 arrow.addEventListener(`click`, () => {
   arrow.style.opacity = `0`;
-})
+  searchInput.value = ``
 
+})
