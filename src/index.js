@@ -133,8 +133,10 @@ function clearCardInterface() {
   listCard.innerHTML = ``;
 }
 
-////// *** //////
 
+
+
+////// *** //////
 const code = ['Search images...'];
 let index = 0;
 let letterIndex = 0;
