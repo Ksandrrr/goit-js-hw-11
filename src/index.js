@@ -33,10 +33,10 @@ const fetchPixabayAPI = (searchTerm, page) => {
       });
   });
 };
-
 let valueInput;
 let cardLength;
 let isSubmitted = false;
+let prevResults;
 formSearch.addEventListener(`submit`, searchPixabay);
 
 function searchPixabay(e) {
@@ -46,12 +46,16 @@ function searchPixabay(e) {
   const {
     elements: { searchQuery },
   } = e.currentTarget;
-  currentSearch = searchQuery.value;
 
   valueInput = searchQuery.value;
+
+   if (prevResults && currentSearch === valueInput) {
+    listCard.innerHTML = prevResults;
+    return;
+  }
   fetchPixabayAPI(valueInput)
     .then(images => {
-      if (searchQuery.value.length === 0) {
+      if (searchQuery.value.trim().length === 0) {
         clearCardInterface();
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
@@ -63,13 +67,16 @@ function searchPixabay(e) {
         );
       } else if (searchQuery.value.length > 0 && images.totalHits > 0) {
         creatCardList(images);
+        prevResults = listCard.innerHTML;
       }
-      if (isSubmitted && images.totalHits > 0) {
+      if (isSubmitted && images.totalHits > 0 && searchQuery.value.trim().length > 0) {
         Notiflix.Notify.success(`Hooray! We found ${images.totalHits} images.`);
       }
+      
       isSubmitted = true;
+      currentSearch = searchQuery.value;
     })
-    .catch(err => Notiflix.Notify.failure(err));
+    .catch(() => Notiflix.Notify.failure(`Not Find!`));
 }
 
 function creatCardList(array) {
@@ -101,7 +108,6 @@ function creatCardList(array) {
   });
   listCard.innerHTML += markupArray.join('');
   const lightbox = new SimpleLightbox('.photo-card a');
-
   cardLength = document.querySelectorAll(`.photo-card`);
 }
 
